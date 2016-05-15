@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://H://DebugStream/.idea/modules/DebugStream.iml" filepath="H://DebugStream/.idea/modules/DebugStream.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/DebugStream_main.iml" filepath="$PROJECT_DIR$/.idea/modules/DebugStream_main.iml" group="DebugStream" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/DebugStream_test.iml" filepath="$PROJECT_DIR$/.idea/modules/DebugStream_test.iml" group="DebugStream" />
+    </modules>
+  </component>
+</project>
