@@ -1,1 +1,4 @@
 *.class
+build/reports/
+build/test-results/
+build/tmp/test/

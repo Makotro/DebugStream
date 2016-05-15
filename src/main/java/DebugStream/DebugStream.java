@@ -1,10 +1,19 @@
-package DebugStream;
+package debugStream;
 
 /**
  * Created by Marko on 15.5.2016.
  */
 public class DebugStream {
 
+    /**
+     * activate debugging for all streams, this will insert current time and source to each System.*.print* message
+     * idea or netbeans users should set their IdeType enum as parameter since they need more information to generate a hyperlink
+     * @param ide
+     */
+    public static void activate(IdeType ide) {
+        DebugErrStream.activate(ide);
+        DebugOutStream.activate(ide);
+    }
     /**
      * activate debugging for all streams, this will insert current time and source to each System.*.print* message
      */

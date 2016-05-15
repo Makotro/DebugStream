@@ -1,9 +1,10 @@
-package DebugStream;
+package debugStream;
 
+
+import static debugStreamUtils.DebugStreamUtils.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.Executors;
@@ -39,8 +40,17 @@ public class DebugErrStream extends PrintStream {
     private static boolean loggingEnabled;
     private static long deletionTime;
     private static String filePath = "/temp/debugstreamlog/";
+    private static IdeType ideType;
 
-
+    /**
+     * activate the Debug stream that inserts current time and stacktrace location for each message
+     * idea or netbeans users should set their IdeType enum as parameter since they need more information to generate a hyperlink
+     * @param ide
+     */
+    public static void activate(IdeType ide) {
+        ideType = ide;
+        activate();
+    }
     /**
      * activate the Debug stream that inserts current time and stacktrace location for each message
      */
@@ -87,54 +97,9 @@ public class DebugErrStream extends PrintStream {
         logger.setUseParentHandlers(false);
         logger.addHandler(handler);
 
-        startPurger();
+        startPurger(deletionTime, filePath);
     }
 
-    /**
-     * Creates the directory if needed.
-     *
-     * @param directoryName the directory name
-     */
-    private static void createDirectoryIfNeeded(String directoryName) {
-        File theDir = new File(directoryName);
-
-        if (!theDir.exists()) {
-            try {
-                theDir.mkdirs();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    /**
-     * This starts an Executor that deletes old files regularly
-     */
-    private static void startPurger() {
-        System.out.println("Starting error log file deletion executor.");
-        Runnable runnable = new Runnable() {
-            public void run() {
-                deleteOldLogs(deletionTime);
-            }
-        };
-        ScheduledExecutorService executor = Executors
-                .newSingleThreadScheduledExecutor();
-        executor.scheduleAtFixedRate(runnable, 0, 60, TimeUnit.MINUTES);
-    }
-
-    // public void initLogging() {
-    //
-    // }
-
-    /**
-     * @return Unique file identifier as String, in other words, current time to the
-     * millisecond
-     */
-    private static String generateID() {
-        SimpleDateFormat sdfDate = new SimpleDateFormat(
-                "yyyy-MM-dd HH-mm-ss.SSS");
-        return sdfDate.format(new Date());
-    }
 
     private DebugErrStream() {
         super(System.err);
@@ -144,18 +109,18 @@ public class DebugErrStream extends PrintStream {
     public void println(Object x) {
         now = new Date();
         strDate = sdfDate.format(now);
-        super.println("[" + strDate + "] " + showLocation() + x);
+        super.println("[" + strDate + "] " + showLocation(ideType) + x);
         if (loggingEnabled)
-            log("[" + strDate + "] " + showLocation() + x);
+            log("[" + strDate + "] " + showLocation(ideType) + x);
     }
 
     @Override
     public void println(String x) {
         now = new Date();
         strDate = sdfDate.format(now);
-        super.println("[" + strDate + "] " + showLocation() + x);
+        super.println("[" + strDate + "] " + showLocation(ideType) + x);
         if (loggingEnabled)
-            log("[" + strDate + "] " + showLocation() + x);
+            log("[" + strDate + "] " + showLocation(ideType) + x);
     }
 
     /**
@@ -165,70 +130,5 @@ public class DebugErrStream extends PrintStream {
         LogRecord record = new LogRecord(Level.INFO, x.toString());
         logger.log(record);
         handler.flush();
-    }
-
-    /**
-     * used to format the message output to log files
-     */
-    private static class MyCustomFormatter extends Formatter {
-        String newline = System.getProperty("line.separator");
-
-        public String format(LogRecord record) {
-            StringBuffer sb = new StringBuffer();
-            sb.append(formatMessage(record));
-            sb.append(newline);
-            return sb.toString();
-        }
-    }
-
-    /**
-     * @return location, i.e. filename and row from where the message originates
-     */
-    private String showLocation() {
-        StackTraceElement element = null;
-        try {
-            element = Thread.currentThread().getStackTrace()[3];
-        } catch (IndexOutOfBoundsException e) {
-        }
-        if (element == null || element.getFileName() == null
-                || element.getFileName().equals(""))
-            return "(unknown) : ";
-        try {
-            if (element.getFileName().toString().contains("P.java"))
-                element = Thread.currentThread().getStackTrace()[4];
-            return (MessageFormat.format("({0}:{1, number,#}) : ",
-                    element.getFileName(), element.getLineNumber()));
-        } catch (NullPointerException e) {
-            return "(unknown) : ";
-        }
-    }
-
-    /**
-     * Deletes all old error logs, this should be called from somewhere that is
-     * run regularly
-     *
-     * @param daysBack How old files are deleted, files age is determined by its last
-     *                 modified time
-     */
-    public static void deleteOldLogs(long daysBack) {
-        String dirWay = filePath;
-        File directory = new File(dirWay);
-        if (directory.exists()) {
-
-            File[] listFiles = directory.listFiles();
-            long purgeTime = System.currentTimeMillis()
-                    - (daysBack * 24 * 60 * 60 * 1000);
-            for (File listFile : listFiles) {
-                if (listFile.lastModified() < purgeTime
-                        && listFile.getName().contains("uilog")
-                        && listFile.getName().contains("error")
-                        && listFile.getName().contains(".txt")) {
-                    if (!listFile.delete()) {
-//						System.err.println("Unable to delete file: " + listFile);
-                    }
-                }
-            }
-//			System.err.println(MessageFormat.format("Info log files older than {0} days, purged.", daysBack));
-        }
     }
 }
