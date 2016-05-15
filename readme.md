@@ -16,3 +16,6 @@ path is a String representation for the directory where to store the log files, 
 Please note that this should not be used in place of regular logging, for that you should use an actual logging library such as log4j.
 
 This is just a helpful tool that I use for my personal projects so I dont have to start a logger for small personal things.
+
+Example from intellij idea
+![Example from intellij idea](images/ideademo.jpg "Example from intellij idea")
