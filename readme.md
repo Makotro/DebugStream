@@ -17,5 +17,10 @@ Please note that this should not be used in place of regular logging, for that y
 
 This is just a helpful tool that I use for my personal projects so I dont have to start a logger for small personal things.
 
-Example from intellij idea
-![Example from intellij idea](images/ideademo.jpg "Example from intellij idea")
+Example from Intellij IDEA, the reason for the lines being in incorrect order I blieve is the result of the standard out and standard error out printsteams not being synchronized in java
+![Example from Intellij IDEA](images/ideademo.jpg "Example from Intellij IDEA")
+
+
+Example from Netbeans, do note that in my testing, mixing standard out and standard error out in netbeans with this tool
+seems to mix up the console printing, so I recommend you only use the standard out version (DebugOutStream.activate();)
+![Example from Netbeans](images/netbeansdemo.jpg "Example from Netbeans")
