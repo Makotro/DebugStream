@@ -1,6 +1,4 @@
-package debugStreamUtils;
-
-import debugStream.IdeType;
+package net.kundit.tools.debugStream;
 
 import java.io.File;
 import java.text.MessageFormat;
@@ -15,7 +13,7 @@ import java.util.logging.LogRecord;
 /**
  * Created by Marko on 15.5.2016.
  */
-public class DebugStreamUtils {
+class DebugStreamUtils {
 
     private static Runnable runnable;
 
@@ -23,7 +21,7 @@ public class DebugStreamUtils {
      * @return Unique file identifier as String, or in other words, current time to the
      * millisecond
      */
-    public static String generateID() {
+    static String generateID() {
         SimpleDateFormat sdfDate = new SimpleDateFormat(
                 "yyyy-MM-dd HH-mm-ss.SSS");
         return sdfDate.format(new Date());
@@ -31,9 +29,9 @@ public class DebugStreamUtils {
     /**
      * @return location, i.e. filename and row from where the message originates
      */
-    public static String showLocation(IdeType ideType) {
+    static String showLocation(IdeType ideType) {
         StackTraceElement element = null;
-        String rtn = "";
+        String rtn;
         try {
             element = Thread.currentThread().getStackTrace()[3];
         } catch (IndexOutOfBoundsException e) {
@@ -93,7 +91,7 @@ public class DebugStreamUtils {
     /**
      * This starts an Executor that deletes old files regularly
      */
-    public static void startPurger(final long deletionTime, final String filePath) {
+    static void startPurger(final long deletionTime, final String filePath) {
         System.out.println("Starting error log file deletion executor.");
         if (runnable == null) {
             runnable = new Runnable() {
@@ -110,7 +108,7 @@ public class DebugStreamUtils {
      *
      * @param directoryName the directory name
      */
-    public static void createDirectoryIfNeeded(String directoryName) {
+    static void createDirectoryIfNeeded(String directoryName) {
         File theDir = new File(directoryName);
 
         if (!theDir.exists()) {
@@ -125,7 +123,7 @@ public class DebugStreamUtils {
     /**
      * used to format the message output to log files
      */
-    public static class MyCustomFormatter extends Formatter {
+    static class MyCustomFormatter extends Formatter {
         String newline = System.getProperty("line.separator");
 
         public String format(LogRecord record) {

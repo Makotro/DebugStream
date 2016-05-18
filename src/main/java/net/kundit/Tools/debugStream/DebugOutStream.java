@@ -1,51 +1,41 @@
-package debugStream;
+package net.kundit.tools.debugStream;
 
+import static net.kundit.tools.debugStream.DebugStreamUtils.*;
+import static net.kundit.tools.debugStream.DebugStreamUtils.startPurger;
 
-import static debugStreamUtils.DebugStreamUtils.*;
-import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.logging.FileHandler;
-import java.util.logging.Formatter;
-import java.util.logging.Level;
-import java.util.logging.LogRecord;
-import java.util.logging.Logger;
+import java.util.logging.*;
 
 /**
- * This class intercepts default System err printstream that goes to the console and
+ * This class intercepts default System out printstream that goes to the console and
  * adds a date and time prefix to it, it also attempts to add a link to the line
  * of code from where the stream originated.
- * It also starts logging the printstream in this form to a file if the .activate(...) with parameters is used
- * System.err includes System.err.print* and most importantly, stacktraces.
+ * It also starts logging the printstream in this form to a file if the .activate(...) with parameters is used.
+ * System.out includes System.out.print*.
  *
  * @author mlpp
  */
-
-public class DebugErrStream extends PrintStream {
-    private static final DebugErrStream INSTANCE = new DebugErrStream();
-    private static Logger logger = Logger.getLogger("syserr.logging");
-    private static String fileIdentifier;
+public final class DebugOutStream extends PrintStream {
+    private static final DebugOutStream INSTANCE = new DebugOutStream();
+    private static Logger logger = Logger.getLogger("sysout.logging");
+    private static String fileIdentified;
+    private static int numOfFiles;
+    private static boolean loggingEnabled;
+    private static long deletionTime;
     private SimpleDateFormat sdfDate = new SimpleDateFormat(
             "yyyy-MM-dd HH:mm:ss");
     private String strDate;
     private Date now;
     private static FileHandler handler = null;
-    private static int numOfFiles;
-    private static int sizeOfFiles;
-    private static boolean loggingEnabled;
-    private static long deletionTime;
     private static String filePath = "/temp/debugstreamlog/";
     private static IdeType ideType;
 
     /**
      * activate the Debug stream that inserts current time and stacktrace location for each message
      * idea or netbeans users should set their IdeType enum as parameter since they need more information to generate a hyperlink
-     * @param ide
      */
     public static void activate(IdeType ide) {
         ideType = ide;
@@ -55,7 +45,7 @@ public class DebugErrStream extends PrintStream {
      * activate the Debug stream that inserts current time and stacktrace location for each message
      */
     public static void activate() {
-        System.setErr(INSTANCE);
+        System.setOut(INSTANCE);
     }
 
     /**
@@ -72,18 +62,20 @@ public class DebugErrStream extends PrintStream {
      */
     public static void activate(String fileID, int maxFileAmount,
                                 int maxSizeInMB, long deleteLogsTime, String path) {
-        fileIdentifier = fileID.equals("") ? generateID() : fileID;
+        if (fileID.equals(""))
+            fileIdentified = generateID();
+        else
+            fileIdentified = fileID;
         filePath = path.equals("") ? filePath : path;
         numOfFiles = maxFileAmount;
         loggingEnabled = true;
-        sizeOfFiles = maxSizeInMB;
+        int sizeOfFiles = maxSizeInMB;
         deletionTime = deleteLogsTime;
         createDirectoryIfNeeded(filePath);
 
         try {
-            // naming of the log file and its size
-            handler = new FileHandler(filePath + "uilog-error."
-                    + fileIdentifier + ".%g.%u.txt", 1024 * 1024 * sizeOfFiles,
+            handler = new FileHandler(filePath + "uilog-info-"
+                    + fileIdentified + ".%g.%u.txt", 1024 * 1024 * sizeOfFiles,
                     numOfFiles, true);
             handler.setFormatter(new MyCustomFormatter());
         } catch (SecurityException e1) {
@@ -97,12 +89,14 @@ public class DebugErrStream extends PrintStream {
         logger.setUseParentHandlers(false);
         logger.addHandler(handler);
 
+
         startPurger(deletionTime, filePath);
     }
 
 
-    private DebugErrStream() {
-        super(System.err);
+
+    private DebugOutStream() {
+        super(System.out);
     }
 
     @Override
@@ -124,11 +118,13 @@ public class DebugErrStream extends PrintStream {
     }
 
     /**
-     * @param x text to log to error log file
+     * @param x text to log to info log file
      */
     private void log(Object x) {
         LogRecord record = new LogRecord(Level.INFO, x.toString());
         logger.log(record);
-        handler.flush();
+//		handler.flush();
+//		handler.close();
     }
+
 }
