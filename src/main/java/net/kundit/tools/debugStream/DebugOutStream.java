@@ -117,6 +117,16 @@ public final class DebugOutStream extends PrintStream {
             log("[" + strDate + "] " + showLocation(ideType) + x);
     }
 
+    @Override
+    public PrintStream printf(String format, Object... args) {
+        now = new Date();
+        strDate = sdfDate.format(now);
+        if (loggingEnabled)
+            log(String.format(String.format("[%s] %s %s", strDate, showLocation(ideType), format), args));
+
+        return super.printf(String.format("[%s] %s %s", strDate, showLocation(ideType), format), args);
+    }
+
     /**
      * @param x text to log to info log file
      */
